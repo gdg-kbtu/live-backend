@@ -10,6 +10,15 @@ python -m pip install Django
 python -m pip install psycopg
 ```
 
+If you use Linux:
+```
+python -m venv venv 
+source venv/bin/activate
+python -m pip install Django
+python -m pip install psycopg
+```
+
+
 2) You need to have postgreSQL local server installed on your machine.  Install --> https://www.enterprisedb.com/downloads/postgres-postgresql-downloads
    Open command line anywhere, then create database:
    ```
@@ -20,7 +29,7 @@ python -m pip install psycopg
 
 
 
-3) In scripts.py,  in DATABASES section,  set USERNAME and PASSWORD to your username and password of postgresql server user
+3) In settings.py,  in DATABASES section,  set USERNAME and PASSWORD to your username and password of postgresql server user
 
 4) In "site" folder:
    ```
