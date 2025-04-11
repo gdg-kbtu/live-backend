@@ -1,0 +1,10 @@
+*.pyc
+__pycache__/
+*.sqlite3
+venv/
+myvenv/
+static/
+media/
+.env
+local_settings.py
+*.swp
