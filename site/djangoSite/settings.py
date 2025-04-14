@@ -84,6 +84,11 @@ DATABASES = {
         'PORT': '5432',       # Leave empty to use the default PostgreSQL port (usually 5432)
     }
 }
+SESSION_COOKIE_NAME = 'sessionid'
+SESSION_SAVE_EVERY_REQUEST = False  # должно быть по умолчанию
+
+
+
 
 
 # Password validation

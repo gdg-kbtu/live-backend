@@ -8,3 +8,4 @@ media/
 .env
 local_settings.py
 *.swp
+config.txt
