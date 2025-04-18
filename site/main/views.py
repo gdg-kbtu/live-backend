@@ -1,99 +1,106 @@
 from django.http import JsonResponse
-from django.contrib.auth.models import User, Group
+from authorization.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.contrib.auth import get_user_model
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from authorization.serializers import UserSerializer
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
+from .serializers import FoundUserSerializer
 
-@csrf_exempt
-@require_GET
-def searchStudent(request):
-    username = request.GET.get("username")
-    try:
-        group = Group.objects.get(name="mentor")
-        user = User.objects.exclude(groups=group).filter(username=username)
+
+
+class searchStudent_APIView(APIView):
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='username',
+                type=OpenApiTypes.STR,
+                description='',
+                required=True,  # Параметр не обязателен
+            ),
+        ]
+    )
+    def get(self, request):
+        username = request.GET.get("username")
+        user = User.objects.filter(username=username).filter(position="student")
+        print(user)
         if user.exists():
-            student_data = {
-                "id": user[0].id,
-                "username": user[0].username,
-            }
-            return JsonResponse({"data": student_data}, status=200)
+            return Response(FoundUserSerializer(user, many=True).data, status=200)
         else:
-            return JsonResponse({"error": "Пользователь не найден"}, status=404)
-    except Exception as e:
-        return JsonResponse({"error": f"Произошла ошибка: {e}"}, status=500)
-    
-@csrf_exempt
-@require_GET
-def searchMentor(request):
-    username = request.GET.get("username")
-    try:
-        group = Group.objects.get(name="mentor")
-        user = User.objects.filter(groups=group).filter(username=username)
+            return Response({"error": "Нет такого студента"}, status=400)
+            
+
+class SearchMentor_APIView(APIView):
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='username',
+                type=OpenApiTypes.STR,
+                description='',
+                required=True,  # Параметр не обязателен
+            ),
+        ]
+    )
+    def get(self, request):
+        username = request.GET.get("username")
+        user = User.objects.filter(username=username).filter(position="mentor")
         if user.exists():
-            mentor_data = {
-                "id": user[0].id,
-                "username": user[0].username,
-            }
-            return JsonResponse({"data": mentor_data}, status=200)
+            return Response(FoundUserSerializer(user, many=True).data, status=200)
         else:
-            return JsonResponse({"error": "Пользователь не найден"}, status=404)
-    except Exception as e:
-        return JsonResponse({"error": f"Произошла ошибка: {e}"}, status=500)
+            return Response({"error": "Нет такого ментора"}, status=400)
 
-@csrf_exempt
-@require_GET
-def getStudents(request):
-    try:
-        group = Group.objects.get(name="mentor")
-        users = User.objects.exclude(groups=group)
 
-        page = request.GET.get("page")
-        paginator = Paginator(users, 5)
+class getStudents_APIview(APIView):
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='page',
+                type=OpenApiTypes.INT,
+                description='Номер страницы для отображения списка студентов.',
+                required=False,  # Параметр не обязателен
+            ),
+        ]
+    )
+    def get(self, request):
+        User = get_user_model()
+        querySet = User.objects.filter(position='student')
+        page = request.query_params.get("page")
+        paginator = Paginator(querySet, 5)
         try:
-            users = paginator.page(page)
+            students = paginator.page(page)
         except PageNotAnInteger:
-            users = paginator.page(1)  # Если page не число, возвращаем первую страницу
+            students = paginator.page(1)
         except EmptyPage:
-            users = paginator.page(paginator.num_pages)  # Если page за пределами диапазона, возвращаем последнюю страницу
+            students = paginator.page(paginator.num_pages)
+        return Response({"students": UserSerializer(students, many=True).data})
         
-        students_data  = []
-        for user in users:
-            students_data.append({
-                "id": user.id,
-                "username": user.username
-            })
+
+
+class GetMentors_APIView(APIView):
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='page',
+                type=OpenApiTypes.INT,
+                description='Номер страницы для отображения списка менторов.',
+                required=False,  # Параметр не обязателен
+            ),
+        ]
+    )
+    def get(self, request):
+        querySet = User.objects.filter(position="mentor")
+        page = request.GET.get("page")
+        paginator = Paginator(querySet, 5)
+        try:
+            mentors = paginator.page(page)
+        except PageNotAnInteger:
+            mentors = paginator.page(1)  # Если page не число, возвращаем первую страницу
+        except EmptyPage:
+            mentors = paginator.page(paginator.num_pages)  # Если page за пределами диапазона, возвращаем последнюю страницу
         
-        return JsonResponse({"data": students_data,
-                             "page": users.number,
-                             "num_pages": paginator.num_pages}, status=200)
-    except Exception as e:
-        return JsonResponse({"error": f"Произошла ошибка: {e}"}, status=500)
+        return Response({"mentors": UserSerializer(mentors, many=True).data}, status=200)
     
-@csrf_exempt
-@require_GET
-def getMentors(request):
-    try:
-        group = Group.objects.get(name="mentor")
-        users = User.objects.filter(groups=group)
-
-        page = request.GET.get("page")
-        paginator = Paginator(users, 5)
-        try:
-            users = paginator.page(page)
-        except PageNotAnInteger:
-            users = paginator.page(1)  # Если page не число, возвращаем первую страницу
-        except EmptyPage:
-            users = paginator.page(paginator.num_pages)  # Если page за пределами диапазона, возвращаем последнюю страницу
-        
-        mentors_data  = []
-        for user in users:
-            mentors_data.append({
-                "id": user.id,
-                "username": user.username
-            })
-        
-        return JsonResponse({"data": mentors_data,
-                             "page": users.number,
-                             "num_pages": paginator.num_pages}, status=200)
-    except Exception as e:
-        return JsonResponse({"error": f"Произошла ошибка: {e}"}, status=500)

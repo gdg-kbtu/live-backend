@@ -1,27 +1,38 @@
 from authorization.models import User
-from django.contrib.auth import get_user_model
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from django.views.decorators.http import require_POST
-
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
+from django.views.decorators.csrf import csrf_protect
+from django.utils.decorators import method_decorator
 # Create your views here.
 
 
-@require_POST
-def attachMentor(request):
-    model = get_user_model()
 
-    params = request.POST
-    studentID_student = params.get("studentID_student")
-    studentID_mentor = params.get("studentID_mentor")
-    try:
-        student = get_object_or_404(model, studentID=studentID_student)
-        mentor = get_object_or_404(model, studentID=studentID_mentor, position="mentor")
-        student.mentor = mentor
-        student.save()
-        return JsonResponse({"message": f"студент {student.username} был прикреплён к ментору {mentor.username}"})
-    except User.DoesNotExist:
-        return JsonResponse({"error": "Студент или ментор не найдены"},  status=404)
-    except Exception as e:
-        return JsonResponse({"error": f"произошла ошибка: {e}"}, status=500)
+@method_decorator(csrf_protect, name='dispatch')
+class AttachMentor_APIView(APIView):
+    @extend_schema(
+        request={
+            'application/json': {
+                'type': 'object',
+                'properties': {
+                    'student_username': {'type': 'string', 'description': 'Первое поле'},
+                    'mentor_username': {'type': 'string', 'description': 'Второе поле'},
+                },
+                'required': ['student_username', 'mentor_username']
+            }
+        },
+        responses={200: OpenApiTypes.OBJECT}
+    )
+    def post(self, request):
+        try:
+            student_username = request.data.get("student_username")
+            mentor_username = request.data.get("mentor_username")
+            student = User.objects.get(username=student_username)
+            mentor = User.objects.get(username=mentor_username)
+            student.mentor = mentor
+            student.save()
+            return Response({"message": f"студент {student_username} был прикреплён к ментору {mentor_username}"}, status=200)
+        except User.DoesNotExist:
+            return Response({"error": "Студент или ментор не найдены"},  status=404)
+
         

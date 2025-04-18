@@ -1,26 +1,22 @@
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-from django.views.decorators.http import require_GET
 from django.contrib.auth.models import User
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
+from django.views.decorators.csrf import csrf_protect
+from django.utils.decorators import method_decorator
 # Create your views here.
 
-@csrf_exempt
-@require_GET
-def getPersonalData(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({"error": "необходима аутентификация"}, status=401)
-    
-    try:
-        user = User.objects.get(username=request.user.username)
-        userData = {
-            "username": user.username,
-            "email": user.email,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            # Добавьте другие поля по мере необходимости
-        }
-        return JsonResponse(userData, status=200)
-    except User.DoesNotExist:
-        return JsonResponse({"error": "пользователь не найден"}, status=404)
-    except Exception as e:
-        return JsonResponse({"error": f"произошла ошибка: {e}"}, status=500)
+
+class GetPersonalData_APIView(APIView):
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return Response({"error": "необходима аутентификация"}, status=401)
+        else:
+            response_data = {
+                "studentID": request.user.studentID,
+                "username": request.user.username,
+                "email": request.user.email,
+                "position": request.user.position,
+                "mentor_id": request.user.mentor_id,
+            }
+            return Response({"user": response_data}, status=200)

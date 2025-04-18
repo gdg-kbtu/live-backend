@@ -45,14 +45,18 @@ INSTALLED_APPS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ]
 }
 
 AUTH_USER_MODEL = "authorization.User"
 
 SPECTACULAR_SETTINGS = {
+    
     'TITLE': 'Django5 Test Swagger API',
     'DESCRIPTION': 'Django5 Test Swagger API description',
-    'VERSION': '1.0.0',
+    'VERSION': '0.28.0',
     'SERVE_INCLUDE_SCHEMA': False,
 }
 
@@ -60,8 +64,8 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -93,8 +97,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'crm',
-        'USER': 'postgres',          # твой юзернейм от юзера postgresql сервера
-        'PASSWORD': 'asd1725271428',      # твой пароль от юзера postgresql сервера
+        'USER': ' ',          # твой юзернейм от юзера postgresql сервера
+        'PASSWORD': ' ',      # твой пароль от юзера postgresql сервера
         'HOST': '127.0.0.1',  # Replace with your PostgreSQL server's address if necessary
         'PORT': '5432',       # Leave empty to use the default PostgreSQL port (usually 5432)
     }
