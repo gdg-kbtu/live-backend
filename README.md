@@ -8,6 +8,8 @@ python -m venv venv
 venv/Scripts/activate
 python -m pip install Django
 python -m pip install psycopg
+python -m pip install djangorestframework
+python -m pip install drf-spectacular
 ```
 
 If you use Linux:
@@ -16,6 +18,8 @@ python -m venv venv
 source venv/bin/activate
 python -m pip install Django
 python -m pip install psycopg
+python -m pip install djangorestframework
+python -m pip install drf-spectacular
 ```
 
 
