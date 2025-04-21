@@ -9,6 +9,35 @@ import requests
 from django.contrib.auth import authenticate
 
 # Create your views here.
+class getRepos_APIView(APIView):
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='username',
+                type=OpenApiTypes.STR,
+                description='Имя пользователя для получения его репозиториев',
+                required=True,
+                location=OpenApiParameter.QUERY
+            )
+        ]
+    )
+    def get(self, request):
+        try:
+            username = request.query_params.get("username")
+            user = User.objects.get(username=username)
+            projects = user.projects.all()
+            projects_serialized = []
+            for project in projects:
+                projects_serialized.append({
+                    "project_id": project.projectID,
+                    "name": project.name,
+                    "description": project.description,
+                    "github_url": project.github_url
+                })
+            return Response(projects_serialized, status=200)
+        except User.DoesNotExist:
+            return Response({"error": "Пользователь не найден"}, status=400)
+
 
 class initRepo_APIView(APIView):
     @extend_schema(
