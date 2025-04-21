@@ -8,6 +8,32 @@ from drf_spectacular.types import OpenApiTypes
 import requests
 from django.contrib.auth import authenticate
 
+class getRepoCommits_APIView(APIView):
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='repo_name',
+                type=OpenApiTypes.STR,
+                description='Имя репозитория для получения его коммитов',
+                required=True,
+                location=OpenApiParameter.QUERY
+            )
+        ]
+    )
+    def get(self, request):
+        repo_name = request.query_params.get("repo_name")
+        repo = Project.objects.get(name=repo_name)
+        commits_data = []
+        commits = repo.commits.all()
+        for commit in commits:
+            commits_data.append({
+                "id": commit.commitID,
+                "details": commit.details,
+                "commitAuthor": commit.commitAuthor
+            })
+        return Response(commits_data, status=200)
+    
+
 # Create your views here.
 class getRepos_APIView(APIView):
     @extend_schema(
