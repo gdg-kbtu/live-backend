@@ -8,7 +8,7 @@ class User(AbstractUser):
     studentID = models.CharField(max_length=10, unique=True)
     position = models.CharField(max_length=10, choices=[('mentor', 'Mentor'), ('student', 'Student')])
     mentor = models.ForeignKey('self', to_field='studentID', related_name='students', on_delete=models.SET_NULL, null=True, blank=True, limit_choices_to={'position': 'mentor'})
-    project = models.ManyToManyField('authorization.Project', blank=True, related_name='contributors')
+    projects = models.ManyToManyField('authorization.Project', blank=True, related_name='contributors')
 
 
 class Project(models.Model):

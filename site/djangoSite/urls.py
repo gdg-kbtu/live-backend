@@ -12,6 +12,7 @@ from drf_spectacular.views import (
 
 
 urlpatterns = [
+    path('initGithub/', include('initGithubProjects.urls')),
     path('mentoring/', include('mentoring.urls')),
     path('main/', include('main.urls')),
     path('cabinet/', include('personalCabinet.urls')),

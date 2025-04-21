@@ -1,9 +1,5 @@
-from django.http import JsonResponse
 from authorization.models import User
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_GET
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.contrib.auth import get_user_model
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from authorization.serializers import UserSerializer
@@ -66,7 +62,6 @@ class getStudents_APIview(APIView):
         ]
     )
     def get(self, request):
-        User = get_user_model()
         querySet = User.objects.filter(position='student')
         page = request.query_params.get("page")
         paginator = Paginator(querySet, 5)
